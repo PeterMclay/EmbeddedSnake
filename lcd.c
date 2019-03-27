@@ -105,7 +105,7 @@ int main(void) {
 			//Move Sanke
 			pos_x_current[0] += dir_x;
 			pos_y_current[0] += dir_y;
-			for (i = 1; i <= size; i++) {
+			for (i = 1; i < size; i++) {
 				pos_x_current[i] = pos_x_previous[i - 1];
 				pos_y_current[i] = pos_y_previous[i - 1];
 			}
