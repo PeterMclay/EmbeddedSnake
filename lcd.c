@@ -81,19 +81,19 @@ int main(void) {
 			if(ReadButtons()){
 				if (crntBTN != prevBTN) {
 					if (crntBTN == 1 && dir_x != -1) {
-						dir_x = 1;
+						dir_x = 8;
 						dir_y = 0;
 					}
 					if (crntBTN == 2 && dir_x != 1) {
-						dir_x = -1;
+						dir_x = -8;
 						dir_y = 0;
 					}
 					if (crntBTN == 4 && dir_y != 1) {
-						dir_y = -1;
+						dir_y = -8;
 						dir_x = 0;
 					}
 					if (crntBTN == 8 && dir_y != -1) {
-						dir_y = 1;
+						dir_y = 8;
 						dir_x = 0;
 					}
 					prevBTN = crntBTN;
