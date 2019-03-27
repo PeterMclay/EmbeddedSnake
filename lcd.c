@@ -6,6 +6,7 @@
  * 1. Writes INTEL FPGA COMPUTER SYSTEMS to the top of the LCD.
  * 2. Bounces a filled in rectangle around the display and off the displayed
  * text.
+ This Is a Test
  ******************************************************************************/
  volatile int* BTN = (int*)KEY_BASE;
  int crntBTN;
