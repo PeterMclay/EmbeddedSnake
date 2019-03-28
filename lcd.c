@@ -13,16 +13,16 @@ int main(void) {
 	char snke[10] = "SNAKE\0";
 	while (1) {
 		//int x, y, 
-		int pos_x_current[3] = { 64, 56, 48 };
-		int pos_y_current[3] = { 24, 24, 24 };
-		int pos_x_previous[3] = { 64, 56, 48 };
-		int pos_y_previous[3] = { 24, 24, 24 };
+		int pos_x_current[25] = {64};
+		int pos_y_current[25] = {24};
+		int pos_x_previous[25] = {64};
+		int pos_y_previous[25] = {24};
 		int length, dir_x, dir_y;
-		int size = 3;
+		int size = 1;
 		int i;
 		volatile int delay_count; // volatile so C compiler doesn't remove the loop
 
-								  //Initialize LCD
+		//Initialize LCD
 		init_spim0();
 		init_lcd();
 		clear_screen();
@@ -120,22 +120,44 @@ int main(void) {
 				pos_y_current[i] = pos_y_previous[i - 1];
 			}
 
+			//Food Location
+			LCD_rect(rx, ry, length, length, 1, 1);
+			
+			//Eats Food
+			if ((pos_x_current[0] == rx) && (pos_y_current[0] == ry)) {
+				rx = rand() % 124 + 1;
+				ry = rand() % 65 + 1;
+				rx = rx - rx % 4;
+				ry = ry - ry % 4;
+
+				if (dir_x == 4) {
+					pos_x_current[size] = pos_x_current[size - 1] - 4;
+					pos_y_current[size] = pos_y_current[size - 1];
+				}
+				else if (dir_x == -4) {
+					pos_x_current[size] = pos_x_current[size - 1] + 4;
+					pos_y_current[size] = pos_y_current[size - 1];
+				}
+				else if (dir_y == 4) {
+					pos_y_current[size] = pos_y_current[size - 1] +4;
+					pos_x_current[size] = pos_x_current[size - 1];
+				}
+				else {
+					pos_y_current[size] = pos_y_current[size - 1] - 4;
+					pos_x_current[size] = pos_x_current[size - 1];
+				}
+				++size;
+			}
+
 			// Update Position
 			for (i = 0; i < size; i++) {
 				LCD_rect(pos_x_current[i], pos_y_current[i], length, length, 1, 1);
 				pos_x_previous[i] = pos_x_current[i];
 				pos_y_previous[i] = pos_y_current[i];
 			}
-			LCD_rect(rx, ry, length, length, 1, 1);
-			if ((pos_x_current[0] == rx) && (pos_y_current[0] == ry)) {
-				rx = rand() % 124 + 1;
-				ry = rand() % 65 + 1;
 
-				rx = rx - rx % 4;
-				ry = ry - ry % 4;
-			}
+			// Update Screen & Delay Loop
 			refresh_buffer();
-			// Delay Loop
 			for (delay_count = 950000; delay_count != 0; --delay_count);
 		}
 	}
