@@ -11,16 +11,19 @@ int prevBTN = 0;
 
 int main(void) {
 	char snke[10] = "SNAKE\0";
+
 	while (1) {
 		//int x, y, 
-		int pos_x_current[25] = {64};
-		int pos_y_current[25] = {24};
-		int pos_x_previous[25] = {64};
-		int pos_y_previous[25] = {24};
+		int pos_x_current[25] = { 64 };
+		int pos_y_current[25] = { 24 };
+		int pos_x_previous[25] = { 64 };
+		int pos_y_previous[25] = { 24 };
 		int length, dir_x, dir_y;
 		int size = 1;
 		int i;
 		volatile int delay_count; // volatile so C compiler doesn't remove the loop
+		int collision = 0;
+
 
 		//Initialize LCD
 		init_spim0();
@@ -29,11 +32,12 @@ int main(void) {
 
 		//Press Button to generate head
 		//char snke[10] = "SNAKE\0";
-		LCD_text(snke, 0);
+
+		//LCD_text(snke, 0);
 		refresh_buffer();
 		while (ReadButtons() == 0);
 		clear_screen();
-		refresh_buffer();
+		//refresh_buffer();
 		crntBTN = 0;
 
 		//Initialize Snake
@@ -47,6 +51,10 @@ int main(void) {
 		for (i = 0; i < size; i++) {
 			LCD_rect(pos_x_current[i], pos_y_current[i], length, length, 1, 1);
 		}
+		LCD_line(0, 0, 61, 1, 1);
+		LCD_line(127, 0, 61, 1, 1);
+		LCD_line(0, 61, 127, 1, 0);
+		LCD_line(5, 0, 60, 1, 0);
 		refresh_buffer();
 
 		/***********	GAME ON **********/
@@ -55,6 +63,10 @@ int main(void) {
 			for (i = 0; i < size; i++) {
 				LCD_rect(pos_x_current[i], pos_y_current[i], length, length, 0, 1);
 			}
+
+
+			//LCD_line(0, 60, 48, 1, 0);			
+
 
 			// Update Snake Direction
 			if (ReadButtons()) {
@@ -96,7 +108,7 @@ int main(void) {
 				for (delay_count = 950000; delay_count != 0; --delay_count);
 				break;
 			}
-			if ((pos_y_current[0] + length >= SCREEN_HEIGHT - 1 && dir_y == 4) || (pos_y_current[0] <= 0 && dir_y == -4)) {
+			if ((pos_y_current[0] + length >= SCREEN_HEIGHT - 4 && dir_y == 4) || (pos_y_current[0] <= 0 && dir_y == -4)) {
 				dir_x = 0;
 				dir_y = 0;
 				char text_gameover_lcd[17] = "Game over :( \0";
@@ -112,6 +124,30 @@ int main(void) {
 				break;
 			}
 
+			for (i = 1; i <size; i++) {
+				if (pos_x_current[0] == pos_x_current[i] && pos_y_current[0] == pos_y_current[i]) {
+					++collision;
+				}
+			}
+
+			if (collision != 0) {
+				dir_x = 0;
+				dir_y = 0;
+				char text_gameover_lcd[17] = "Game over :( \0";
+				LCD_text(text_gameover_lcd, 0);
+				refresh_buffer();
+				char text_top_lcd[35] = "self coll\0";
+				LCD_text(text_top_lcd, 1);
+				refresh_buffer();
+				while (ReadButtons() == 0);
+				crntBTN = 0;
+				collision = 1;
+				prevBTN = 6;
+				for (delay_count = 950000; delay_count != 0; --delay_count);
+				collision = 0;
+				break;
+			}
+
 			//Move Sanke
 			pos_x_current[0] += dir_x;
 			pos_y_current[0] += dir_y;
@@ -122,13 +158,25 @@ int main(void) {
 
 			//Food Location
 			LCD_rect(rx, ry, length, length, 1, 1);
-			
+
 			//Eats Food
 			if ((pos_x_current[0] == rx) && (pos_y_current[0] == ry)) {
+
 				rx = rand() % 124 + 1;
-				ry = rand() % 65 + 1;
+				ry = rand() % 64 + 1;
 				rx = rx - rx % 4;
 				ry = ry - ry % 4;
+
+				for (i = 0; i<size; i++) {
+					if (rx == pos_x_current[i] || ry == pos_y_current[i]) {
+						i = 0;
+						rx = rand() % 124 + 1;
+						ry = rand() % 63 + 1;
+						rx = rx - rx % 4;
+						ry = ry - ry % 4;
+					}
+
+				}
 
 				if (dir_x == 4) {
 					pos_x_current[size] = pos_x_current[size - 1] - 4;
@@ -139,7 +187,7 @@ int main(void) {
 					pos_y_current[size] = pos_y_current[size - 1];
 				}
 				else if (dir_y == 4) {
-					pos_y_current[size] = pos_y_current[size - 1] +4;
+					pos_y_current[size] = pos_y_current[size - 1] + 4;
 					pos_x_current[size] = pos_x_current[size - 1];
 				}
 				else {
@@ -186,4 +234,3 @@ int ReadButtons(void) {
 	}
 	return 0;
 }
-
