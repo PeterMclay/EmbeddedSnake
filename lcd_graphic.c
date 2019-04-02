@@ -23,6 +23,22 @@ void clear_screen(void)
     refresh_buffer();
 }
 
+void fill_screen(void)
+{
+    int i, j;
+    for (i = 0; i < FRAME_HEIGHT; i++)
+    {
+        for (j = 0; j < FRAME_WIDTH; j++)
+        {
+            frame_buffer[i][j] = 1;
+        }
+    }
+
+    refresh_buffer();
+}
+
+
+
 /*
  * Writes the contents of the frame buffer to the LCD display.
  */
@@ -83,8 +99,10 @@ void LCD_line(int x, int y, int length, int color, int vert)
 
         page = y >> 3; // y/8
         mask = 0x01 << (y % 8);
+		
+		
         for (i = x_start; i < x_end; i++)
-        {
+        {			
             if (color)
                 frame_buffer[page][i] |= mask;
             else
@@ -106,8 +124,9 @@ void LCD_line(int x, int y, int length, int color, int vert)
  */
 void LCD_rect(int x1, int y1, int width, int height, int color, int fill)
 {
+	
     int x2 = x1 + width;
-    int y2 = y1 + width;
+    int y2 = y1 + height;
     int i;
 
     if (!fill)
@@ -119,7 +138,7 @@ void LCD_rect(int x1, int y1, int width, int height, int color, int fill)
     }
     else
     {
-        for (i = y1; i <= y2; i++)
+        for (i = y1; i < y2; i++)
             LCD_line(x1, i, width, color, 0);
     }
 }
