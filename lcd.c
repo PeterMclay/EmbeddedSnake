@@ -2,6 +2,7 @@
 #include "lcd_graphic.h"
 #include "address_map_arm.h"
 #include "GSInterface.h"
+#include "Highscore.h"
 /*******************************************************************************
 ECE 3375 Group Projecct
 SNAKE
@@ -214,7 +215,7 @@ int main(void) {
 		xRightBound = (SCREEN_WIDTH - xLeftOutline - xRightOutline) / xWidth - 1;
 		yTopBound = 0;
 		yBotBound = (SCREEN_HEIGHT - yTopOutline - yBotOutline) / yWidth - 1;
-		doomValue = 1;
+		doomValue = 1.0;
 
 		//Initialize LCD21
 		init_spim0();
@@ -295,6 +296,9 @@ int main(void) {
 				LCD_text(text_gameover_lcd, 0);
 				LCD_text(text_top_lcd, 1);
 				refresh_buffer();
+				
+				game_over_text(length-1);
+				
 				while (ReadButtonsStart() == 0);
 				crntBTN = 0;
 				prev_switch = readSwitch();
@@ -317,7 +321,7 @@ int main(void) {
 					}
 				}
 				length += 1;
-				doomValue = 1.0 / (0.9 + (length / 10));
+				doomValue = 1.0 / ((1.0-(1/18.0)) + (length / 18.0));
 			}
 
 			//Display the score
@@ -338,6 +342,16 @@ int main(void) {
 
 			//Draw Food
 			LCD_rect(rx*xWidth + xLeftOutline, ry*yWidth + yBotOutline, xWidth, yWidth, 1, 1);
+			LCD_line(rx*xWidth + xLeftOutline ,ry*yWidth + yBotOutline, 1, 0, 0);
+			LCD_line(rx*xWidth + xLeftOutline + xWidth - 1 , ry*yWidth + yBotOutline, 1, 0, 0);
+			LCD_line(rx*xWidth + xLeftOutline, ry*yWidth + yBotOutline+yWidth - 1, 1, 0, 0);
+			LCD_line(rx*xWidth + xLeftOutline+xWidth - 1,ry*yWidth + yBotOutline+yWidth - 1, 1, 0, 0);
+			LCD_line(rx*xWidth + xLeftOutline+3,ry*yWidth + yBotOutline+2, 1, 0, 0);
+			
+			//Draw snake head 
+			LCD_line(pos_x_current[0]*xWidth + xLeftOutline+((xWidth-1)*(dir_x+dir_y>0)), pos_y_current[0]*yWidth + yBotOutline+((yWidth-1)*((dir_x+dir_y>0))), 1, 0, 0);
+			LCD_line(pos_x_current[0]*xWidth + xLeftOutline+((xWidth-1)*(!(dir_y-dir_x>0))), pos_y_current[0]*yWidth + yBotOutline+((yWidth-1)*((dir_y-dir_x>0))), 1, 0, 0);
+			
 			refresh_buffer();
 
 			// Delay Loop
@@ -345,7 +359,7 @@ int main(void) {
 				for (delay_count = 1800000 * doomValue; delay_count != 0; --delay_count);
 			}
 			else {
-				for (delay_count = 130000 * doomValue; delay_count != 0; --delay_count) {
+				for (delay_count = 110000 * doomValue; delay_count != 0; --delay_count) {
 					for (i = 0; i < 1000; i++);
 					ReadButtons();
 				}
